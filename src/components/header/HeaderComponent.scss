@@ -1,0 +1,11 @@
+.container__header{
+    background: rgb(252, 97, 97);
+    background-color: 'red';
+    display: flex;
+    justify-content: space-around;
+}
+.subcontainer__header{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
