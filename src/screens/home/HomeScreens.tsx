@@ -153,6 +153,10 @@ const HomeScreen = () => {
                         <p> {productDetail.title}</p>
                         <p className="subtitle"> {productDetail.description}</p>
                         <p> <span> S/</span> {productDetail.price}</p>
+                        {
+                            (shopingCart.find(element => element.id === productDetail.id)) ? <Button size="small" onClick={() => { deleteCart(productDetail) }} variant="contained" color="primary"> Eliminar</Button> :
+                                <Button size="small" onClick={() => { addToCart(productDetail) }} variant="contained" color="primary"> Agregar</Button>
+                        }
                     </div>
                 }
             </Modal>
