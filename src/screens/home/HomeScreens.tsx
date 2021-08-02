@@ -51,9 +51,8 @@ const useStyles = makeStyles((theme: Theme) =>
 const HomeScreen = () => {
     const array: any[] = [];
     const classes = useStyles();
-    // getModalStyle is not a pure function, we roll the style only on the first render
-    const [modalStyle] = React.useState(getModalStyle);
-    const [open, setOpen] = React.useState(false);
+    const [modalStyle] = useState(getModalStyle);
+    const [open, setOpen] = useState(false);
     const [products, setProducts] = useState([]);
     const [countCart, setCountCart] = useState<number>(0);
     const [priceCart, setPriceCart] = useState<number>(0);
