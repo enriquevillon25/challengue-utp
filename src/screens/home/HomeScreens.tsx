@@ -6,14 +6,12 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 import './HomeScreen.scss'
 import Modal from '@material-ui/core/Modal';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-// import { Alert, AlertTitle } from '@material-ui/lab';
-
 import Button from '@material-ui/core/Button';
-
+import URL_API from '../../config/api';
 function rand() {
     return Math.round(Math.random() * 20) - 10;
 }
@@ -40,6 +38,12 @@ const useStyles = makeStyles((theme: Theme) =>
             padding: theme.spacing(2, 4, 3),
             textAlign: 'center',
         },
+        root: {
+            display: 'flex',
+            '& > * + *': {
+                marginLeft: theme.spacing(2),
+            },
+        },
     }),
 );
 
@@ -54,20 +58,24 @@ const HomeScreen = () => {
     const [countCart, setCountCart] = useState<number>(0);
     const [priceCart, setPriceCart] = useState<number>(0);
     const [previewDetail, setPreviewDetail] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [loadingModal, setLoadingModal] = useState<boolean>(false);
     const [shopingCart, setShopingCart] = useState<Product[]>([]);
     const [productDetail, setProductDetail] = useState<Product>({ description: '', title: '', id: 0, image: '', price: 0 });
 
     useEffect(() => {
-        axios.get('https://fakestoreapi.com/products').then(response => {
+        setLoading(true)
+        axios.get(`${URL_API}`).then(response => {
+            setLoading(false);
             setProducts(response.data)
         })
     }, [])
 
     const handleOpen = (id: number) => {
 
-        console.log(id)
-        axios.get(`https://fakestoreapi.com/products/${id}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(response => {
-            console.log('productdetail', response.data)
+        setLoadingModal(true)
+        axios.get(`${URL_API}/${id}`, { headers: { 'Access-Control-Allow-Origin': '*' } }).then(response => {
+            setLoadingModal(false)
             setProductDetail(response.data)
         })
         setOpen(true)
@@ -103,6 +111,11 @@ const HomeScreen = () => {
     return (
         <>
             <HeaderComponent badge={countCart} totalPrice={priceCart} />
+            {
+                (loading) && <div className="container__loading">
+                    <CircularProgress />
+                </div>
+            }
             <div className="container">
 
                 {
@@ -112,19 +125,21 @@ const HomeScreen = () => {
                                 <CardMedia
                                     component="img"
                                     alt="Contemplative Reptile"
-                                    height="40%"
+                                    height="30%"
                                     image={product.image}
                                     title="Contemplative Reptile"
                                 />
                                 <CardContent>
-                                    <p className="title" > {product.title.substr(0, 20)}</p>
-                                    <p className="subtitle"> {product.description.substr(0, 100)}</p>
-                                    <p className="price"> <span> S/</span> {product.price}</p>
+                                    <div >
+                                        <p className="title" > {product.title.substr(0, 20)}</p>
+                                        <p className="subtitle"> {product.description.substr(0, 70)}</p>
+                                        <p className="price"> <span> S/</span> {product.price}</p>
+                                    </div>
                                 </CardContent>
                                 <CardActions>
-                                    <Button size="small" onClick={() => { handleOpen(product.id) }} variant="contained" color="primary"> Vista </Button>
+                                    <Button size="small" onClick={() => { handleOpen(product.id) }} variant="contained" color="inherit"> Vista </Button>
                                     {
-                                        (shopingCart.find(element => element.id === product.id)) ? <Button size="small" onClick={() => { deleteCart(product) }} variant="contained" color="primary"> Eliminar</Button> :
+                                        (shopingCart.find(element => element.id === product.id)) ? <Button size="small" onClick={() => { deleteCart(product) }} variant="contained" color="secondary"> Eliminar</Button> :
 
                                             <Button size="small" onClick={() => { addToCart(product) }} variant="contained" color="primary"> Agregar</Button>
                                     }
@@ -146,19 +161,33 @@ const HomeScreen = () => {
                 aria-labelledby="simple-modal-title"
                 aria-describedby="simple-modal-description"
             >
-                {
-                    (productDetail) &&
-                    <div style={modalStyle} className={classes.paper}>
-                        <img src={productDetail.image} style={{ width: '20%' }} />
-                        <p> {productDetail.title}</p>
-                        <p className="subtitle"> {productDetail.description}</p>
-                        <p> <span> S/</span> {productDetail.price}</p>
-                        {
-                            (shopingCart.find(element => element.id === productDetail.id)) ? <Button size="small" onClick={() => { deleteCart(productDetail) }} variant="contained" color="primary"> Eliminar</Button> :
-                                <Button size="small" onClick={() => { addToCart(productDetail) }} variant="contained" color="primary"> Agregar</Button>
-                        }
-                    </div>
-                }
+                <>
+                    {
+
+                    }
+                    {
+                        (productDetail) &&
+                        <div style={modalStyle} className={classes.paper}>
+                            {(loadingModal) &&
+                                <CircularProgress />
+                            }
+                            {
+                                (productDetail.id != 0) && <>
+                                    <img src={productDetail.image} style={{ width: '20%' }} />
+                                    <p> {productDetail.title}</p>
+                                    <p className="subtitle"> {productDetail.description}</p>
+                                    <p> Producto recomendado </p>
+                                    <p> <span> S/</span> {productDetail.price}</p>
+                                    {
+                                        (shopingCart.find(element => element.id === productDetail.id)) ? <Button size="small" onClick={() => { deleteCart(productDetail) }} variant="contained" color="secondary"> Eliminar</Button> :
+                                            <Button size="small" onClick={() => { addToCart(productDetail) }} variant="contained" color="primary"> Agregar</Button>
+                                    }
+                                </>
+                            }
+
+                        </div>
+                    }
+                </>
             </Modal>
         </>
     )
